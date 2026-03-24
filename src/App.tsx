@@ -92,7 +92,6 @@ function NoRoleScreen() {
     </div>
   );
 }
-}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
