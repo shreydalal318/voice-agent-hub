@@ -79,17 +79,7 @@ function AppRoutes() {
   // User has no role assigned yet
   return (
     <Routes>
-      <Route path="*" element={
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center space-y-2">
-            <p className="text-muted-foreground">Your account has no role assigned yet.</p>
-            <p className="text-sm text-muted-foreground">Please contact your administrator.</p>
-            <button onClick={() => { const { signOut } = useAuth(); signOut(); }} className="text-primary text-sm underline">
-              Sign out
-            </button>
-          </div>
-        </div>
-      } />
+      <Route path="*" element={<NoRoleScreen />} />
     </Routes>
   );
 }
