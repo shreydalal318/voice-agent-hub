@@ -4,7 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Login from "./pages/Login";
+import Onboarding from "./pages/Onboarding";
 import AdminLayout from "./layouts/AdminLayout";
 import ClientLayout from "./layouts/ClientLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -23,8 +26,28 @@ const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user, role, loading } = useAuth();
+  const [hasClient, setHasClient] = useState<boolean | null>(null);
+  const [checkingClient, setCheckingClient] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    if (!user || loading) return;
+
+    // For client role or no role, check if client record exists
+    if (role === 'client' || role === null) {
+      setCheckingClient(true);
+      supabase
+        .from('clients')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          setHasClient(!!data);
+          setCheckingClient(false);
+        });
+    }
+  }, [user, role, loading]);
+
+  if (loading || checkingClient) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-muted-foreground text-sm">Loading...</div>
@@ -41,7 +64,6 @@ function AppRoutes() {
     );
   }
 
-  // Redirect based on role
   if (role === 'admin') {
     return (
       <Routes>
@@ -58,38 +80,30 @@ function AppRoutes() {
     );
   }
 
-  if (role === 'client') {
+  // Client role (or no role yet) — check onboarding
+  if (!hasClient) {
     return (
       <Routes>
-        <Route path="/dashboard" element={<ClientLayout />}>
-          <Route index element={<ClientDashboard />} />
-          <Route path="agents" element={<ClientAgents />} />
-          <Route path="knowledge" element={<ClientKnowledge />} />
-          <Route path="bookings" element={<ClientBookings />} />
-          <Route path="phone-numbers" element={<ClientPhoneNumbers />} />
-          <Route path="settings" element={<ClientSettings />} />
-        </Route>
-        <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
   }
 
-  // User has no role assigned yet
-  return <NoRoleScreen />;
-}
-
-function NoRoleScreen() {
-  const { signOut } = useAuth();
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center space-y-2">
-        <p className="text-muted-foreground">Your account has no role assigned yet.</p>
-        <p className="text-sm text-muted-foreground">Please contact your administrator.</p>
-        <button onClick={() => signOut()} className="text-primary text-sm underline">Sign out</button>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/dashboard" element={<ClientLayout />}>
+        <Route index element={<ClientDashboard />} />
+        <Route path="agents" element={<ClientAgents />} />
+        <Route path="knowledge" element={<ClientKnowledge />} />
+        <Route path="bookings" element={<ClientBookings />} />
+        <Route path="phone-numbers" element={<ClientPhoneNumbers />} />
+        <Route path="settings" element={<ClientSettings />} />
+      </Route>
+      <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
