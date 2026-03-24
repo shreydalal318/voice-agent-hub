@@ -14,16 +14,330 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agents: {
+        Row: {
+          client_id: string
+          created_at: string
+          elevenlabs_agent_id: string | null
+          id: string
+          name: string
+          phone_number_id: string | null
+          prompt: string | null
+          status: string | null
+          total_calls: number | null
+          total_minutes: number | null
+          updated_at: string
+          voice_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          elevenlabs_agent_id?: string | null
+          id?: string
+          name: string
+          phone_number_id?: string | null
+          prompt?: string | null
+          status?: string | null
+          total_calls?: number | null
+          total_minutes?: number | null
+          updated_at?: string
+          voice_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          elevenlabs_agent_id?: string | null
+          id?: string
+          name?: string
+          phone_number_id?: string | null
+          prompt?: string | null
+          status?: string | null
+          total_calls?: number | null
+          total_minutes?: number | null
+          updated_at?: string
+          voice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agents_phone_number_id_fkey"
+            columns: ["phone_number_id"]
+            isOneToOne: false
+            referencedRelation: "phone_numbers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          agent_id: string | null
+          booking_type: string
+          client_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          date_time: string | null
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          booking_type: string
+          client_id: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          date_time?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          booking_type?: string
+          client_id?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          date_time?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          business_name: string
+          business_type: string
+          created_at: string
+          id: string
+          max_agents: number | null
+          max_minutes: number | null
+          subscription_plan: string | null
+          subscription_status: string | null
+          total_calls: number | null
+          updated_at: string
+          used_minutes: number | null
+          user_id: string
+        }
+        Insert: {
+          business_name: string
+          business_type?: string
+          created_at?: string
+          id?: string
+          max_agents?: number | null
+          max_minutes?: number | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          total_calls?: number | null
+          updated_at?: string
+          used_minutes?: number | null
+          user_id: string
+        }
+        Update: {
+          business_name?: string
+          business_type?: string
+          created_at?: string
+          id?: string
+          max_agents?: number | null
+          max_minutes?: number | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          total_calls?: number | null
+          updated_at?: string
+          used_minutes?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      knowledge_base: {
+        Row: {
+          agent_id: string | null
+          client_id: string
+          content: string | null
+          created_at: string
+          file_type: string | null
+          file_url: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          agent_id?: string | null
+          client_id: string
+          content?: string | null
+          created_at?: string
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          agent_id?: string | null
+          client_id?: string
+          content?: string | null
+          created_at?: string
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_base_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      phone_numbers: {
+        Row: {
+          assigned_agent_id: string | null
+          assigned_client_id: string | null
+          created_at: string
+          id: string
+          label: string | null
+          number: string
+          status: string | null
+        }
+        Insert: {
+          assigned_agent_id?: string | null
+          assigned_client_id?: string | null
+          created_at?: string
+          id?: string
+          label?: string | null
+          number: string
+          status?: string | null
+        }
+        Update: {
+          assigned_agent_id?: string | null
+          assigned_client_id?: string | null
+          created_at?: string
+          id?: string
+          label?: string | null
+          number?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phone_numbers_assigned_agent_id_fkey"
+            columns: ["assigned_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phone_numbers_assigned_client_id_fkey"
+            columns: ["assigned_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "client"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +464,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "client"],
+    },
   },
 } as const
