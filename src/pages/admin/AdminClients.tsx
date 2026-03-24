@@ -40,26 +40,23 @@ export default function AdminClients() {
     e.preventDefault();
     setCreating(true);
 
-    // Create user via Supabase auth (admin would use edge function in production)
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: { data: { full_name: form.business_name } }
+    const { data, error } = await supabase.functions.invoke('create-user', {
+      body: {
+        email: form.email,
+        password: form.password,
+        role: 'client',
+        business_name: form.business_name,
+        business_type: form.business_type,
+      },
     });
 
-    if (authError || !authData.user) {
-      toast.error(authError?.message ?? 'Failed to create user');
+    if (error || data?.error) {
+      toast.error(data?.error ?? error?.message ?? 'Failed to create client');
       setCreating(false);
       return;
     }
 
-    // Note: In production, use an edge function with service role to:
-    // 1. Create user without signing in
-    // 2. Add client role
-    // 3. Create client record
-    // For now, the profile is auto-created by trigger
-
-    toast.success('Client invitation sent. They need to confirm their email.');
+    toast.success('Client created successfully');
     setDialogOpen(false);
     setForm({ email: '', password: '', business_name: '', business_type: 'other' });
     setCreating(false);
