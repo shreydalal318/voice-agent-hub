@@ -26,31 +26,44 @@ const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user, role, loading } = useAuth();
+  const userId = user?.id ?? null;
   const [hasClient, setHasClient] = useState<boolean | null>(null);
-  const [checkingClient, setCheckingClient] = useState(false);
-  const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user || loading) return;
-    if (role === 'admin') return;
+    if (loading) return;
 
-    // Only re-check if user changed
-    if (checkedUserId === user.id) return;
+    if (!userId) {
+      setHasClient(null);
+      return;
+    }
 
-    setCheckingClient(true);
+    if (role === 'admin') {
+      setHasClient(true);
+      return;
+    }
+
+    let cancelled = false;
+    setHasClient(null);
+
     supabase
       .from('clients')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .maybeSingle()
       .then(({ data }) => {
-        setHasClient(!!data);
-        setCheckingClient(false);
-        setCheckedUserId(user.id);
+        if (!cancelled) {
+          setHasClient(!!data);
+        }
       });
-  }, [user, role, loading, checkedUserId]);
 
-  if (loading || checkingClient) {
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, userId, role]);
+
+  const isCheckingClient = !!userId && role !== 'admin' && hasClient === null;
+
+  if (loading || isCheckingClient) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-muted-foreground text-sm">Loading...</div>
@@ -83,7 +96,6 @@ function AppRoutes() {
     );
   }
 
-  // Client role (or no role yet) — check onboarding
   if (!hasClient) {
     return (
       <Routes>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -20,40 +20,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
+  const requestIdRef = useRef(0);
 
-  const fetchRole = async (userId: string) => {
+  const fetchRole = async (userId: string): Promise<UserRole> => {
     const { data } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
       .maybeSingle();
-    setRole((data?.role as UserRole) ?? null);
+
+    return (data?.role as UserRole) ?? null;
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchRole(session.user.id);
-        } else {
-          setRole(null);
-        }
-        setLoading(false);
-      }
-    );
+    let isMounted = true;
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchRole(session.user.id);
+    const syncAuthState = async (nextSession: Session | null) => {
+      const currentRequestId = ++requestIdRef.current;
+      const nextUser = nextSession?.user ?? null;
+
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextUser);
+
+      if (!nextUser) {
+        setRole(null);
+        setLoading(false);
+        return;
       }
+
+      const nextRole = await fetchRole(nextUser.id);
+
+      if (!isMounted || currentRequestId !== requestIdRef.current) return;
+
+      setRole(nextRole);
       setLoading(false);
+    };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      void syncAuthState(nextSession);
     });
 
-    return () => subscription.unsubscribe();
+    void supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      void syncAuthState(initialSession);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
