@@ -28,24 +28,27 @@ function AppRoutes() {
   const { user, role, loading } = useAuth();
   const [hasClient, setHasClient] = useState<boolean | null>(null);
   const [checkingClient, setCheckingClient] = useState(false);
+  const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || loading) return;
+    if (role === 'admin') return;
 
-    // For client role or no role, check if client record exists
-    if (role === 'client' || role === null) {
-      setCheckingClient(true);
-      supabase
-        .from('clients')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          setHasClient(!!data);
-          setCheckingClient(false);
-        });
-    }
-  }, [user, role, loading]);
+    // Only re-check if user changed
+    if (checkedUserId === user.id) return;
+
+    setCheckingClient(true);
+    supabase
+      .from('clients')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setHasClient(!!data);
+        setCheckingClient(false);
+        setCheckedUserId(user.id);
+      });
+  }, [user, role, loading, checkedUserId]);
 
   if (loading || checkingClient) {
     return (
