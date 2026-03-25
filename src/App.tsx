@@ -91,6 +91,8 @@ function AppRoutes() {
         </Route>
         <Route path="/login" element={<Navigate to="/admin" replace />} />
         <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route path="/onboarding" element={<Navigate to="/admin" replace />} />
+        <Route path="/dashboard/*" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     );
@@ -117,6 +119,8 @@ function AppRoutes() {
       </Route>
       <Route path="/login" element={<Navigate to="/dashboard" replace />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/onboarding" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/admin/*" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
