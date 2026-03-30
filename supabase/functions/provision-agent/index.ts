@@ -50,6 +50,7 @@ serve(async (req) => {
       await supabaseAdmin.from('clients').update({
         business_name,
         business_type,
+        onboarding_completed: true,
       }).eq('id', existingClient.id);
       clientId = existingClient.id;
     } else {
@@ -57,6 +58,7 @@ serve(async (req) => {
         user_id: userId,
         business_name,
         business_type,
+        onboarding_completed: true,
       }).select('id').single();
       if (clientError) throw new Error('Failed to create client: ' + clientError.message);
       clientId = newClient.id;
@@ -95,7 +97,7 @@ serve(async (req) => {
       name: agent_name || `${business_name} Assistant`,
     };
 
-    const elevenlabsRes = await fetch('https://api.elevenlabs.io/v1/convai/agents/create', {
+    const elevenlabsRes = await fetch('https://api.elevenlabs.io/v1/convai/agents', {
       method: 'POST',
       headers: {
         'xi-api-key': ELEVENLABS_API_KEY,

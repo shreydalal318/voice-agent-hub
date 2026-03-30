@@ -234,6 +234,8 @@ export type Database = {
         Row: {
           assigned_agent_id: string | null
           assigned_client_id: string | null
+          elevenlabs_phone_number_id: string | null
+          vobiz_phone_number_id: string | null
           created_at: string
           id: string
           label: string | null
@@ -243,6 +245,8 @@ export type Database = {
         Insert: {
           assigned_agent_id?: string | null
           assigned_client_id?: string | null
+          elevenlabs_phone_number_id?: string | null
+          vobiz_phone_number_id?: string | null
           created_at?: string
           id?: string
           label?: string | null
@@ -252,6 +256,8 @@ export type Database = {
         Update: {
           assigned_agent_id?: string | null
           assigned_client_id?: string | null
+          elevenlabs_phone_number_id?: string | null
+          vobiz_phone_number_id?: string | null
           created_at?: string
           id?: string
           label?: string | null

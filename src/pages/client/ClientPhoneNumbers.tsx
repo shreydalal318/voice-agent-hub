@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useClientId } from '@/hooks/useClientId';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Phone } from 'lucide-react';
 
@@ -13,6 +15,7 @@ interface PhoneNumber {
   label: string | null;
   status: string | null;
   assigned_agent_id: string | null;
+  elevenlabs_phone_number_id: string | null;
 }
 
 interface AgentOption {
@@ -25,6 +28,7 @@ export default function ClientPhoneNumbers() {
   const [phones, setPhones] = useState<PhoneNumber[]>([]);
   const [agents, setAgents] = useState<AgentOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialToByPhoneId, setDialToByPhoneId] = useState<Record<string, string>>({});
 
   const fetchData = async () => {
     if (!clientId) return;
@@ -47,8 +51,63 @@ export default function ClientPhoneNumbers() {
     if (error) toast.error(error.message);
     else {
       toast.success('Phone number updated');
+
+      // Keep ElevenLabs inbound agent assignment in sync with the selected agent.
+      // This enables inbound calls to be routed to the correct agent.
+      const { error: syncError, data: syncData } = await supabase.functions.invoke(
+        'sync-elevenlabs-phone-number-agent',
+        { body: { phoneNumberId: phoneId, agentId: actualAgentId } },
+      );
+      if (syncError || syncData?.error) {
+        toast.error(syncData?.error ?? syncError?.message ?? 'Failed to sync to ElevenLabs');
+      } else {
+        toast.success('Inbound routing updated');
+      }
+
       fetchData();
     }
+  };
+
+  const initiateOutboundCall = async (phone: PhoneNumber) => {
+    const to = (dialToByPhoneId[phone.id] ?? '').trim();
+    if (!to) {
+      toast.error('Enter a destination number first');
+      return;
+    }
+    if (!phone.assigned_agent_id) {
+      toast.error('Assign an agent to this number first');
+      return;
+    }
+    if (!phone.elevenlabs_phone_number_id) {
+      toast.error('This number is not synced into ElevenLabs yet (ask admin to sync it)');
+      return;
+    }
+
+    const { data, error } = await supabase.functions.invoke('initiate-outbound-call', {
+      body: {
+        phoneNumberId: phone.id,
+        toNumber: to,
+      },
+    });
+
+    const typed = data as { error?: string; message?: string; success?: boolean } | null;
+    if (error) {
+      toast.error(error.message || 'Failed to start call');
+      return;
+    }
+
+    if (typed?.error) {
+      toast.error(typed.error);
+      return;
+    }
+
+    if (typed?.success === false || typed?.message) {
+      toast.error(typed.message || 'Failed to start call');
+      return;
+    }
+
+    toast.success('Call initiated');
+    setDialToByPhoneId((prev) => ({ ...prev, [phone.id]: '' }));
   };
 
   if (clientLoading) return <div className="text-muted-foreground p-8">Loading...</div>;
@@ -79,6 +138,7 @@ export default function ClientPhoneNumbers() {
                   <TableHead>Number</TableHead>
                   <TableHead>Label</TableHead>
                   <TableHead>Linked Agent</TableHead>
+                  <TableHead>Dial</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -101,6 +161,23 @@ export default function ClientPhoneNumbers() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </TableCell>
+                    <TableCell className="w-72">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={dialToByPhoneId[phone.id] ?? ''}
+                          onChange={(e) => setDialToByPhoneId((prev) => ({ ...prev, [phone.id]: e.target.value }))}
+                          placeholder="To number (e.g. +14155550100)"
+                          className="h-8"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => initiateOutboundCall(phone)}
+                          disabled={!phone.assigned_agent_id || !phone.elevenlabs_phone_number_id || !(dialToByPhoneId[phone.id] ?? '').trim()}
+                        >
+                          Dial
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

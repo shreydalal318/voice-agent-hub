@@ -1,0 +1,134 @@
+
+
+---
+
+# Page: /account/balance
+
+'use client';
+const tableOfContents = [
+{ id: 'transactions', title: 'Get Transactions', level: 2 },
+{ id: 'balance', title: 'Get Balance', level: 2 },
+];
+return (
+# Balance & Transactions
+Retrieve account balance details and transaction history.
+{/* Get Transactions */}
+## Get Transactions
+GET
+`https://api.vobiz.ai/api/v1/account/{'{auth_id}'}/transactions`
+Retrieve a list of transactions for a specific account.
+Authentication Required:
+- • **X-Auth-ID:** Your account ID (e.g., {'{Auth_ID}'})
+- • **X-Auth-Token:** Your account Auth Token
+- • **Content-Type:** application/json
+### Request
+```
+curl --location 'https://api.vobiz.ai/api/v1/account/YOUR_AUTH_ID/transactions?limit=50&offset=0' \\
+--header 'X-Auth-ID: YOUR_AUTH_ID' \\
+--header 'X-Auth-Token: YOUR_AUTH_TOKEN' \\
+--header 'Accept: application/json'
+```
+### Response
+```
+{
+"auth_id": "MA_XXXXXX",
+"total": 125,
+"page": 1,
+"per_page": 50,
+"total_pages": 3,
+"transactions": [
+{
+"id": "txn_6883ee37-4085-465f-97c2-e1c67c50aab9",
+"auth_id": "MA_XXXXXX",
+"balance_id": "bal_a84cd3a6-21f4-4b4c-99f2-3d069cb65459",
+"type": "debit",
+"amount": 0.9,
+"currency": "INR",
+"description": "Stream session (70s)",
+"reference": "cdr_e565c2de-975c-4ba5-b115-44b1042cd397",
+"reference_type": "cdr",
+"status": "completed",
+"processed_at": "2025-12-08T09:38:06.923988Z",
+"created_at": "2025-12-08T09:38:06.923988Z",
+"updated_at": "2025-12-08T09:38:06.923988Z"
+},
+{
+"id": "txn_6aa3bf01-9158-4f1a-9980-8b3416b57e5a",
+"auth_id": "MA_XXXXXX",
+"balance_id": "bal_a84cd3a6-21f4-4b4c-99f2-3d069cb65459",
+"type": "debit",
+"amount": 0.45,
+"currency": "INR",
+"description": "Stream session (30s)",
+"reference": "cdr_f876d3ef-1234-5678-90ab-cdef12345678",
+"reference_type": "cdr",
+"status": "completed",
+"processed_at": "2025-12-08T09:40:15.123456Z",
+"created_at": "2025-12-08T09:40:15.123456Z",
+"updated_at": "2025-12-08T09:40:15.123456Z"
+}
+],
+"summary": {
+"total_transactions": 125,
+"total_debit": 150.75,
+"total_credit": 500.00,
+"net_amount": 349.25,
+"by_reference_type": [
+{
+"reference_type": "cdr",
+"total_debit": 140.25,
+"total_credit": 0.00,
+"count": 110
+},
+{
+"reference_type": "payment",
+"total_debit": 0.00,
+"total_credit": 500.00,
+"count": 1
+},
+{
+"reference_type": "refund",
+"total_debit": 10.50,
+"total_credit": 0.00,
+"count": 14
+}
+]
+}
+}
+```
+{/* Get Balance */}
+## Get Balance
+GET
+`https://api.vobiz.ai/api/v1/account/{'{auth_id}'}/balance/{'{currency}'}`
+Retrieve the balance for a specific account and currency.
+Authentication Required:
+- • **X-Auth-ID:** Your account ID (e.g., {'{Auth_ID}'})
+- • **X-Auth-Token:** Your account Auth Token
+- • **Content-Type:** application/json
+### Request
+```
+curl --location 'https://api.vobiz.ai/api/v1/account/YOUR_AUTH_ID/balance/INR' \\
+--header 'X-Auth-ID: YOUR_AUTH_ID' \\
+--header 'X-Auth-Token: YOUR_AUTH_TOKEN' \\
+--header 'Accept: application/json'
+```
+### Response
+```
+{
+"id": "bal_a84cd3a6-21f4-4b4c-99f2-3d069cb65459",
+"auth_id": "MA_XXXXXX",
+"currency": "INR",
+"balance": 3082.65,
+"reserved_funds": 0,
+"promotional_balance": 100.50,
+"promotional_reserved_balance": 0,
+"promo_credits": 25.00,
+"available_balance": 3183.15,
+"credit_limit": 0,
+"low_balance_threshold": 50,
+"status": "active",
+"created_at": "2025-10-17T08:51:01.646973Z",
+"updated_at": "2025-12-08T09:38:06.921968Z"
+}
+```
+);

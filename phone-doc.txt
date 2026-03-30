@@ -1,0 +1,199 @@
+
+
+---
+
+# Page: /account-phone-number/list-inventory-numbers
+
+'use client';
+const tableOfContents = [
+{ id: 'introduction', title: 'Introduction', level: 2 },
+{ id: 'http-request', title: 'HTTP Request', level: 2 },
+{ id: 'query-parameters', title: 'Query Parameters', level: 2 },
+{ id: 'response', title: 'Response', level: 2 },
+{ id: 'examples', title: 'Examples', level: 2 }
+];
+return (
+# List Inventory Numbers
+Browse available phone numbers in inventory that are not assigned to any account.
+This endpoint lists phone numbers in inventory (auth_id IS NULL) that are available for purchase. These are numbers that can be assigned to your account using the [Purchase from Inventory](/account-phone-number/purchase-from-inventory) endpoint.
+**Note:** Only numbers with status='active' and auth_id=NULL are returned. These numbers are ready to be purchased and assigned to your account.
+## HTTP Request
+GET
+/v1/account/{`{auth_id}`}/inventory/numbers
+Authentication Required:
+- • **X-Auth-ID:** Your Auth ID (e.g., {'{Auth_ID}'})
+- • **X-Auth-Token:** Your account Auth Token
+- • **Content-Type:** application/json
+## Query Parameters
+## Response
+Returns a paginated list of phone numbers available in inventory.
+```
+{
+"items": [
+{
+"id": "550e8400-e29b-41d4-a716-446655440000",
+"e164": "+14155551234",
+"country": "US",
+"region": "CA",
+"status": "active",
+"setup_fee": 0.0,
+"monthly_fee": 1.0,
+"currency": "INR",
+"created_at": "2025-01-15T10:00:00Z",
+"updated_at": "2025-01-15T10:00:00Z"
+}
+],
+"page": 1,
+"per_page": 25,
+"total": 500
+}
+```
+## Examples
+#### cURL - List All Inventory Numbers
+```
+curl -X GET "https://api.vobiz.ai/api/v1/account/{AUTH_ID}/inventory/numbers?page=1&per_page=25" \\
+-H "X-Auth-ID: {AUTH_ID}" \\
+-H "X-Auth-Token: {AUTH_TOKEN}"
+```
+#### cURL - Filter by Country
+```
+curl -X GET "https://api.vobiz.ai/api/v1/account/{AUTH_ID}/inventory/numbers?country=US&page=1&per_page=25" \\
+-H "X-Auth-ID: {AUTH_ID}" \\
+-H "X-Auth-Token: {AUTH_TOKEN}"
+```
+**Use Cases:**
+- • Browse available numbers before purchasing
+- • Check inventory for specific countries or regions
+- • View pricing information for available numbers
+- • Find numbers with specific capabilities (voice, SMS, MMS)
+**Next Step:** Once you find a number you want, use the [Purchase from Inventory](/account-phone-number/purchase-from-inventory) endpoint to assign it to your account.
+);
+
+
+
+
+---
+
+# Page: /account-phone-number/list-inventory-numbers
+
+'use client';
+const tableOfContents = [
+{ id: 'introduction', title: 'Introduction', level: 2 },
+{ id: 'http-request', title: 'HTTP Request', level: 2 },
+{ id: 'query-parameters', title: 'Query Parameters', level: 2 },
+{ id: 'response', title: 'Response', level: 2 },
+{ id: 'examples', title: 'Examples', level: 2 }
+];
+return (
+# List Inventory Numbers
+Browse available phone numbers in inventory that are not assigned to any account.
+This endpoint lists phone numbers in inventory (auth_id IS NULL) that are available for purchase. These are numbers that can be assigned to your account using the [Purchase from Inventory](/account-phone-number/purchase-from-inventory) endpoint.
+**Note:** Only numbers with status='active' and auth_id=NULL are returned. These numbers are ready to be purchased and assigned to your account.
+## HTTP Request
+GET
+/v1/account/{`{auth_id}`}/inventory/numbers
+Authentication Required:
+- • **X-Auth-ID:** Your Auth ID (e.g., {'{Auth_ID}'})
+- • **X-Auth-Token:** Your account Auth Token
+- • **Content-Type:** application/json
+## Query Parameters
+## Response
+Returns a paginated list of phone numbers available in inventory.
+```
+{
+"items": [
+{
+"id": "550e8400-e29b-41d4-a716-446655440000",
+"e164": "+14155551234",
+"country": "US",
+"region": "CA",
+"status": "active",
+"setup_fee": 0.0,
+"monthly_fee": 1.0,
+"currency": "INR",
+"created_at": "2025-01-15T10:00:00Z",
+"updated_at": "2025-01-15T10:00:00Z"
+}
+],
+"page": 1,
+"per_page": 25,
+"total": 500
+}
+```
+## Examples
+#### cURL - List All Inventory Numbers
+```
+curl -X GET "https://api.vobiz.ai/api/v1/account/{AUTH_ID}/inventory/numbers?page=1&per_page=25" \\
+-H "X-Auth-ID: {AUTH_ID}" \\
+-H "X-Auth-Token: {AUTH_TOKEN}"
+```
+#### cURL - Filter by Country
+```
+curl -X GET "https://api.vobiz.ai/api/v1/account/{AUTH_ID}/inventory/numbers?country=US&page=1&per_page=25" \\
+-H "X-Auth-ID: {AUTH_ID}" \\
+-H "X-Auth-Token: {AUTH_TOKEN}"
+```
+**Use Cases:**
+- • Browse available numbers before purchasing
+- • Check inventory for specific countries or regions
+- • View pricing information for available numbers
+- • Find numbers with specific capabilities (voice, SMS, MMS)
+**Next Step:** Once you find a number you want, use the [Purchase from Inventory](/account-phone-number/purchase-from-inventory) endpoint to assign it to your account.
+);
+
+
+
+---
+
+# Page: /account-phone-number/unrent-number
+
+'use client';
+const tableOfContents = [
+{ id: 'unrent-number', title: 'Release a Number', level: 2 },
+{ id: 'arguments', title: 'Arguments', level: 2 },
+{ id: 'response', title: 'Response', level: 2 }
+];
+return (
+{/* Release a Number */}
+# Release a Phone Number
+Releases a phone number from your account back to inventory. This operation cannot be undone.
+API Endpoint
+DELETE
+`https://api.vobiz.ai/api/v1/account/{'{auth_id}'}/numbers/{'{e164_number}'}`
+Authentication Required:
+- • **X-Auth-ID:** Your Auth ID (e.g., {'{Auth_ID}'})
+- • **X-Auth-Token:** Your account Auth Token
+- • **Content-Type:** application/json
+### Warning  Releasing a phone number is a permanent action that cannot be reversed. Once released, the number returns to inventory and you will lose access to it immediately. Any active calls or configurations using this number will be affected.
+{/* Path Parameters */}
+## Path Parameters
+**e164_number:** The phone number in E.164 format to release (e.g., "+918071387149"). This must be a number currently assigned to your account.
+No request body is required for this endpoint.
+#### cURL - X-Auth-ID & X-Auth-Token
+```
+curl -X DELETE "https://api.vobiz.ai/api/v1/account/{AUTH_ID}/numbers/{PHONE_NUMBER}" \\
+-H "X-Auth-ID: {AUTH_ID}" \\
+-H "X-Auth-Token: {AUTH_TOKEN}"
+```
+{/* Response */}
+## Response Example
+```
+{
+"message": "number returned to inventory"
+}
+```
+**Success:** The phone number has been released from your account and returned to inventory.
+**Changes Made:**
+- `auth_id` set to NULL
+- `trunk_group_id` set to NULL
+- `released_at` timestamp set
+- Number becomes available in inventory for purchase
+**Error Response (403 Forbidden):** If account does not own this number:
+```
+{
+"error": "forbidden",
+"message": "account does not own this number"
+}
+```
+{/* Previous/Next Page Navigation */}
+);

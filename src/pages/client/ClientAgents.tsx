@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useClientId } from '@/hooks/useClientId';
 import { ELEVENLABS_VOICES } from '@/lib/constants';
@@ -24,16 +25,11 @@ interface Agent {
   created_at: string;
 }
 
-const defaultForm = { name: '', voice_id: '', prompt: '', use_case: '' };
-
 export default function ClientAgents() {
   const { clientId, loading: clientLoading } = useClientId();
+  const navigate = useNavigate();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState(defaultForm);
-  const [saving, setSaving] = useState(false);
 
   const fetchAgents = async () => {
     if (!clientId) return;
@@ -51,49 +47,11 @@ export default function ClientAgents() {
   }, [clientId]);
 
   const openCreate = () => {
-    setEditingId(null);
-    setForm(defaultForm);
-    setDialogOpen(true);
+    navigate('/dashboard/agents/new');
   };
 
   const openEdit = (agent: Agent) => {
-    setEditingId(agent.id);
-    setForm({
-      name: agent.name,
-      voice_id: agent.voice_id ?? '',
-      prompt: agent.prompt ?? '',
-      use_case: '',
-    });
-    setDialogOpen(true);
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!clientId) return;
-    setSaving(true);
-
-    if (editingId) {
-      const { error } = await supabase.from('agents').update({
-        name: form.name,
-        voice_id: form.voice_id || null,
-        prompt: form.prompt || null,
-      }).eq('id', editingId);
-      if (error) toast.error(error.message);
-      else toast.success('Agent updated');
-    } else {
-      const { error } = await supabase.from('agents').insert({
-        client_id: clientId,
-        name: form.name,
-        voice_id: form.voice_id || null,
-        prompt: form.prompt || null,
-      });
-      if (error) toast.error(error.message);
-      else toast.success('Agent created');
-    }
-
-    setSaving(false);
-    setDialogOpen(false);
-    fetchAgents();
+    navigate(`/dashboard/agents/${agent.id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -176,52 +134,6 @@ export default function ClientAgents() {
           ))}
         </div>
       )}
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingId ? 'Edit Agent' : 'Create New Agent'}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSave} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Agent Name</Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Reception Assistant"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Voice</Label>
-              <Select value={form.voice_id} onValueChange={(v) => setForm({ ...form, voice_id: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a voice..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {ELEVENLABS_VOICES.map((voice) => (
-                    <SelectItem key={voice.id} value={voice.id}>
-                      {voice.name} — {voice.gender}, {voice.accent}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>System Prompt</Label>
-              <Textarea
-                value={form.prompt}
-                onChange={(e) => setForm({ ...form, prompt: e.target.value })}
-                placeholder="You are a helpful receptionist for a medical clinic. You help patients book appointments..."
-                rows={5}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={saving}>
-              {saving ? 'Saving...' : editingId ? 'Update Agent' : 'Create Agent'}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

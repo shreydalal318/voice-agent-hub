@@ -20,6 +20,7 @@ import ClientKnowledge from "./pages/client/ClientKnowledge";
 import ClientBookings from "./pages/client/ClientBookings";
 import ClientPhoneNumbers from "./pages/client/ClientPhoneNumbers";
 import ClientSettings from "./pages/client/ClientSettings";
+import ClientAgentEditor from "./pages/client/ClientAgentEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,12 +48,20 @@ function AppRoutes() {
 
     supabase
       .from('clients')
-      .select('id')
+      .select('id, onboarding_completed')
       .eq('user_id', userId)
       .maybeSingle()
       .then(({ data }) => {
         if (!cancelled) {
-          setHasClient(!!data);
+          if (!data) {
+            setHasClient(false);
+          } else {
+            // Some projects update DB columns before types generation;
+            // keep this assertion narrow to avoid `any`.
+            const onboardingCompleted =
+              (data as { onboarding_completed?: boolean | null }).onboarding_completed === true;
+            setHasClient(onboardingCompleted);
+          }
         }
       });
 
@@ -112,6 +121,7 @@ function AppRoutes() {
       <Route path="/dashboard" element={<ClientLayout />}>
         <Route index element={<ClientDashboard />} />
         <Route path="agents" element={<ClientAgents />} />
+        <Route path="agents/:agentId" element={<ClientAgentEditor />} />
         <Route path="knowledge" element={<ClientKnowledge />} />
         <Route path="bookings" element={<ClientBookings />} />
         <Route path="phone-numbers" element={<ClientPhoneNumbers />} />
